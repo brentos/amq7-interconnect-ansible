@@ -1,0 +1,69 @@
+- hosts: brokers
+  remote_user: ec2-user
+  become: true
+
+  tasks:
+  - name: Add amq group for broker
+    group: name=amq state=present
+  - name: Add amq user
+    user:
+      name: amq
+      group: amq
+      comment: AMQ service account
+      createhome: no
+      state: present
+      system: yes
+  - name: Add repository
+    yum_repository:
+      name: epel
+      description: EPEL YUM repo
+      baseurl: https://dl.fedoraproject.org/pub/epel/7/x86_64/
+      gpgcheck: no
+  - name: Install required dependencies
+    yum:
+      name: "{{ item }}"
+      state: latest
+    with_items:
+       - wget
+       - unzip
+       - java-1.8.0-openjdk
+       - libaio
+  - name: Download AMQ7 broker zip
+    get_url:
+      url: https://s3-us-west-2.amazonaws.com/paypal-poc-resources/jboss-amq-7.0.0.Alpha-bin.zip
+      dest: /tmp/amq.zip
+      mode: 0644
+  - name: Extract AMQ7 zip
+    unarchive:
+      src: "/tmp/amq.zip"
+      dest: "/tmp"
+      remote_src: yes
+      copy: no
+  - name: Move and rename amq directory
+    command: creates="/opt/amq" mv /tmp/A-MQ7-7.0.0.ER7-redhat-1 /opt/amq
+  - name: Create master broker {{ inventory_hostname }}
+    command: "/opt/amq/bin/artemis create --aio --allow-anonymous --user admin --password admin --role amq --clustered --cluster-user amq-cluster-user --cluster-password 4mq-clu5t3r-p455w0rd --host {{ ansible_host }} --replicated /var/lib/broker"
+    when: "'masters' in group_names"
+  - name: Create slave broker {{ inventory_hostname }}
+    command: "/opt/amq/bin/artemis create --aio --allow-anonymous --user admin --password admin --role amq --clustered --cluster-user amq-cluster-user --cluster-password 4mq-clu5t3r-p455w0rd --host {{ ansible_host }} --replicated --slave /var/lib/broker"
+    when: "'slaves' in group_names"
+  - name: Set user and group for amq
+    file:
+      path: "/var/lib/broker"
+      state: directory
+      owner: amq
+      group: amq
+      recurse: yes
+  - name: Update broker.xml
+    template:
+      src: templates/broker.xml
+      dest: /var/lib/broker/etc/broker.xml
+      force: yes
+      owner: amq
+      group: amq
+      mode: 0644
+  - name: Expose admin console
+    replace:
+      dest: /var/lib/broker/etc/bootstrap.xml
+      regexp: 'localhost'
+      replace: '0.0.0.0'

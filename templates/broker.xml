@@ -1,0 +1,160 @@
+<?xml version='1.0'?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<configuration xmlns="urn:activemq"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation="urn:activemq /schema/artemis-configuration.xsd">
+
+   <jms xmlns="urn:activemq:jms">
+      <queue name="DLQ"/>
+      <queue name="ExpiryQueue"/>
+      <queue name="myTestQueue"/>
+   </jms>
+
+   <core xmlns="urn:activemq:core">
+
+      <name>{{ ansible_host }}</name>
+
+      <persistence-enabled>true</persistence-enabled>
+
+      <!-- this could be ASYNCIO or NIO
+       -->
+      <journal-type>ASYNCIO</journal-type>
+
+      <paging-directory>./data/paging</paging-directory>
+
+      <bindings-directory>./data/bindings</bindings-directory>
+
+      <journal-directory>./data/journal</journal-directory>
+
+      <large-messages-directory>./data/large-messages</large-messages-directory>
+
+      <journal-min-files>2</journal-min-files>
+
+      <journal-pool-files>-1</journal-pool-files>
+
+      <!--
+       This value was determined through a calculation.
+       Your system could perform 0.99 writes per millisecond
+       on the current journal configuration.
+       That translates as a sync write every 1012000 nanoseconds
+      -->
+      <journal-buffer-timeout>1012000</journal-buffer-timeout>
+
+
+    <connectors>
+        <!-- Connector used to be announced through cluster connections and notifications -->
+        <connector name="artemis">tcp://{{ ansible_host }}:61616</connector>
+        <connector name="cluster-connector">{% if 'slaves' in group_names %}tcp://{{ hostvars[groups.masters[groups.slaves.index(inventory_hostname)]].ansible_host }}:61616{% else %}tcp://{{ hostvars[groups.slaves[groups.masters.index(inventory_hostname)]].ansible_host }}:61616{% endif %}</connector>
+    </connectors>
+
+
+      <acceptors>
+         <!-- Default ActiveMQ Artemis Acceptor.  Multi-protocol adapter.  Currently supports ActiveMQ Artemis Core, OpenWire, STOMP, AMQP, MQTT, and HornetQ Core. -->
+         <!-- performance tests have shown that openWire performs best with these buffer sizes -->
+         <acceptor name="artemis">tcp://{{ ansible_host }}:61616?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576</acceptor>
+
+         <!-- AMQP Acceptor.  Listens on default AMQP port for AMQP traffic.-->
+         <acceptor name="amqp">tcp://{{ ansible_host }}:5672?protocols=AMQP</acceptor>
+
+         <!-- STOMP Acceptor. -->
+         <acceptor name="stomp">tcp://{{ ansible_host }}:61613?protocols=STOMP</acceptor>
+
+         <!-- HornetQ Compatibility Acceptor.  Enables HornetQ Core and STOMP for legacy HornetQ clients. -->
+         <acceptor name="hornetq">tcp://{{ ansible_host }}:5445?protocols=HORNETQ,STOMP</acceptor>
+
+         <!-- MQTT Acceptor -->
+         <acceptor name="mqtt">tcp://{{ ansible_host }}:1883?protocols=MQTT</acceptor>
+
+      </acceptors>
+
+
+      <cluster-user>amq-cluster-user</cluster-user>
+
+      <cluster-password>4mq-clu5t3r-p455w0rd</cluster-password>
+
+      <!-- <broadcast-groups>
+         <broadcast-group name="bg-group1">
+            <group-address>231.7.7.7</group-address>
+            <group-port>9876</group-port>
+            <broadcast-period>5000</broadcast-period>
+            <connector-ref>artemis</connector-ref>
+         </broadcast-group>
+      </broadcast-groups>
+
+      <discovery-groups>
+         <discovery-group name="dg-group1">
+            <group-address>231.7.7.7</group-address>
+            <group-port>9876</group-port>
+            <refresh-timeout>10000</refresh-timeout>
+         </discovery-group>
+      </discovery-groups> -->
+
+      <cluster-connections>
+         <cluster-connection name="my-cluster">
+            <address>jms</address>
+            <connector-ref>artemis</connector-ref>
+            <message-load-balancing>ON_DEMAND</message-load-balancing>
+            <max-hops>1</max-hops>
+            <static-connectors>
+              <connector-ref>cluster-connector</connector-ref>
+            </static-connectors>
+         </cluster-connection>
+      </cluster-connections>
+
+
+      <ha-policy>
+         <replication>
+           {% if 'masters' in group_names %}
+            <master>
+              <check-for-live-server>true</check-for-live-server>
+            </master>
+            {% else %}
+            <slave/>
+            {% endif %}
+         </replication>
+      </ha-policy>
+
+      <security-settings>
+         <security-setting match="#">
+            <permission type="createNonDurableQueue" roles="amq"/>
+            <permission type="deleteNonDurableQueue" roles="amq"/>
+            <permission type="createDurableQueue" roles="amq"/>
+            <permission type="deleteDurableQueue" roles="amq"/>
+            <permission type="consume" roles="amq"/>
+            <permission type="send" roles="amq"/>
+            <!-- we need this otherwise ./artemis data imp wouldn't work -->
+            <permission type="manage" roles="amq"/>
+         </security-setting>
+      </security-settings>
+
+      <address-settings>
+         <!--default for catch all-->
+         <address-setting match="#">
+            <dead-letter-address>jms.queue.DLQ</dead-letter-address>
+            <expiry-address>jms.queue.ExpiryQueue</expiry-address>
+            <redelivery-delay>0</redelivery-delay>
+            <max-size-bytes>10485760</max-size-bytes>
+            <message-counter-history-day-limit>10</message-counter-history-day-limit>
+            <address-full-policy>BLOCK</address-full-policy>
+         </address-setting>
+      </address-settings>
+   </core>
+</configuration>
