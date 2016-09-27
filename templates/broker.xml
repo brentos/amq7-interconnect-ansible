@@ -31,23 +31,15 @@ under the License.
    <core xmlns="urn:activemq:core">
 
       <name>{{ ansible_host }}</name>
-
       <persistence-enabled>true</persistence-enabled>
-
       <!-- this could be ASYNCIO or NIO
        -->
       <journal-type>ASYNCIO</journal-type>
-
       <paging-directory>./data/paging</paging-directory>
-
       <bindings-directory>./data/bindings</bindings-directory>
-
       <journal-directory>./data/journal</journal-directory>
-
       <large-messages-directory>./data/large-messages</large-messages-directory>
-
       <journal-min-files>2</journal-min-files>
-
       <journal-pool-files>-1</journal-pool-files>
 
       <!--
@@ -70,43 +62,19 @@ under the License.
          <!-- Default ActiveMQ Artemis Acceptor.  Multi-protocol adapter.  Currently supports ActiveMQ Artemis Core, OpenWire, STOMP, AMQP, MQTT, and HornetQ Core. -->
          <!-- performance tests have shown that openWire performs best with these buffer sizes -->
          <acceptor name="artemis">tcp://{{ ansible_host }}:61616?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576</acceptor>
-
          <!-- AMQP Acceptor.  Listens on default AMQP port for AMQP traffic.-->
          <acceptor name="amqp">tcp://{{ ansible_host }}:5672?protocols=AMQP</acceptor>
-
          <!-- STOMP Acceptor. -->
          <acceptor name="stomp">tcp://{{ ansible_host }}:61613?protocols=STOMP</acceptor>
-
          <!-- HornetQ Compatibility Acceptor.  Enables HornetQ Core and STOMP for legacy HornetQ clients. -->
          <acceptor name="hornetq">tcp://{{ ansible_host }}:5445?protocols=HORNETQ,STOMP</acceptor>
-
          <!-- MQTT Acceptor -->
          <acceptor name="mqtt">tcp://{{ ansible_host }}:1883?protocols=MQTT</acceptor>
-
       </acceptors>
 
 
       <cluster-user>amq-cluster-user</cluster-user>
-
       <cluster-password>4mq-clu5t3r-p455w0rd</cluster-password>
-
-      <!-- <broadcast-groups>
-         <broadcast-group name="bg-group1">
-            <group-address>231.7.7.7</group-address>
-            <group-port>9876</group-port>
-            <broadcast-period>5000</broadcast-period>
-            <connector-ref>artemis</connector-ref>
-         </broadcast-group>
-      </broadcast-groups>
-
-      <discovery-groups>
-         <discovery-group name="dg-group1">
-            <group-address>231.7.7.7</group-address>
-            <group-port>9876</group-port>
-            <refresh-timeout>10000</refresh-timeout>
-         </discovery-group>
-      </discovery-groups> -->
-
       <cluster-connections>
          <cluster-connection name="my-cluster">
             <address>jms</address>

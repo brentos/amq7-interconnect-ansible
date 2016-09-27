@@ -17,3 +17,13 @@
        - qpid-dispatch-router
        - qpid-dispatch-tools
        - qpid-dispatch-docs
+  - name: Update qdrouterd.conf
+    template:
+      src: templates/{{inventory_hostname}}
+      dest: /etc/qpid-dispatch/qdrouterd.conf
+      force: yes
+  - name: Start qdrouterd service
+    service:
+      name: qdrouterd.service
+      enabled: yes
+      state: started

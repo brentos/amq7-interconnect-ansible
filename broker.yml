@@ -67,3 +67,5 @@
       dest: /var/lib/broker/etc/bootstrap.xml
       regexp: 'localhost'
       replace: '0.0.0.0'
+  - name: Start broker
+    command: /var/lib/broker/bin/artemis-service start
