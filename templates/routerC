@@ -1,0 +1,76 @@
+router {
+    mode: interior
+    id: {{ inventory_hostname }}
+}
+
+listener {
+    name: inter-router-listener-{{ inventory_hostname }}
+    host: 0.0.0.0
+    port: 55672
+    authenticatePeer: no
+    role: inter-router
+}
+
+listener {
+    name: amqp-listener-{{ inventory_hostname }}
+    host: 0.0.0.0
+    port: amqp
+    authenticatePeer: no
+}
+
+connector {
+  name: INTER_ROUTER_ROUTERB
+  host: {{ hostvars['routerA'].ansible_host }}
+  port: 55672
+  role: inter-router
+}
+
+connector {
+  name: INTER_ROUTER_ROUTERC
+  host: {{ hostvars['routerB'].ansible_host }}
+  port: 55672
+  role: inter-router
+}
+
+connector {
+    name: BROKER1
+    host: {{ hostvars['brokerA'].ansible_host }}
+    port: amqp
+    role: route-container
+}
+
+connector {
+    name: BROKER2
+    host: {{ hostvars['brokerB'].ansible_host }}
+    port: amqp
+    role: route-container
+}
+
+address {
+    prefix: jms.queue
+    waypoint: yes
+}
+
+autoLink {
+    addr: jms.queue.testqueue
+    connection: BROKER1
+    dir: in
+}
+
+autoLink {
+    addr: jms.queue.testqueue
+    connection: BROKER1
+    dir: out
+}
+
+autoLink {
+    addr: jms.queue.testqueue
+    connection: BROKER2
+    dir: in
+}
+
+autoLink {
+    addr: jms.queue.testqueue
+    connection: BROKER2
+    dir: out
+}
