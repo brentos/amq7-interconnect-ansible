@@ -16,16 +16,16 @@ brokers
 ansible_ssh_private_key_file=/home/brentos/.ssh/brent-aws.pem
 
 [routers]
-routerA ansible_host=ec2-52-34-201-148.us-west-2.compute.amazonaws.com
-routerB ansible_host=ec2-52-43-182-214.us-west-2.compute.amazonaws.com
-routerC ansible_host=ec2-52-43-99-93.us-west-2.compute.amazonaws.com
+routerA ansible_host=ec2-52-26-154-148.us-west-2.compute.amazonaws.com
+routerB ansible_host=ec2-52-27-162-47.us-west-2.compute.amazonaws.com
+routerC ansible_host=ec2-52-33-49-115.us-west-2.compute.amazonaws.com
 
 [brokers:children]
 masters
 slaves
 
 [masters]
-brokerA ansible_host=ec2-52-27-245-121.us-west-2.compute.amazonaws.com
+brokerA ansible_host=ec2-52-43-11-121.us-west-2.compute.amazonaws.com
 
 [slaves]
-brokerB ansible_host=ec2-54-70-145-75.us-west-2.compute.amazonaws.com
+brokerB ansible_host=ec2-54-71-117-138.us-west-2.compute.amazonaws.com

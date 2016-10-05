@@ -41,10 +41,10 @@
       copy: no
   - name: Move and rename amq directory
     command: creates="/opt/amq" mv /tmp/A-MQ7-7.0.0.ER7-redhat-1 /opt/amq
-  - name: Create master broker {{ inventory_hostname }}
+  - name: Create master broker
     command: "/opt/amq/bin/artemis create --aio --allow-anonymous --user admin --password admin --role amq --clustered --cluster-user amq-cluster-user --cluster-password 4mq-clu5t3r-p455w0rd --host {{ ansible_host }} --replicated /var/lib/broker"
     when: "'masters' in group_names"
-  - name: Create slave broker {{ inventory_hostname }}
+  - name: Create slave broker
     command: "/opt/amq/bin/artemis create --aio --allow-anonymous --user admin --password admin --role amq --clustered --cluster-user amq-cluster-user --cluster-password 4mq-clu5t3r-p455w0rd --host {{ ansible_host }} --replicated --slave /var/lib/broker"
     when: "'slaves' in group_names"
   - name: Set user and group for amq
@@ -67,5 +67,5 @@
       dest: /var/lib/broker/etc/bootstrap.xml
       regexp: 'localhost'
       replace: '0.0.0.0'
-  - name: Start broker
-    command: /var/lib/broker/bin/artemis-service start
+  - name: reStart broker
+    command: /var/lib/broker/bin/artemis-service restart

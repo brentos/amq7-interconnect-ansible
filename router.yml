@@ -26,4 +26,4 @@
     service:
       name: qdrouterd.service
       enabled: yes
-      state: started
+      state: restarted

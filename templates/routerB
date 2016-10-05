@@ -18,19 +18,7 @@ listener {
     authenticatePeer: no
 }
 
-connector {
-  name: INTER_ROUTER_ROUTERB
-  host: {{ hostvars['routerA'].ansible_host }}
-  port: 55672
-  role: inter-router
-}
 
-connector {
-  name: INTER_ROUTER_ROUTERC
-  host: {{ hostvars['routerC'].ansible_host }}
-  port: 55672
-  role: inter-router
-}
 
 connector {
     name: BROKER1
