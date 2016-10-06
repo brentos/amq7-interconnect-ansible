@@ -13,19 +13,19 @@ routers
 brokers
 
 [all:vars]
-ansible_ssh_private_key_file=/home/brentos/.ssh/brent-aws.pem
+ansible_ssh_private_key_file=<path_to_pem_file>
 
 [routers]
-routerA ansible_host=ec2-52-26-154-148.us-west-2.compute.amazonaws.com
-routerB ansible_host=ec2-52-27-162-47.us-west-2.compute.amazonaws.com
-routerC ansible_host=ec2-52-33-49-115.us-west-2.compute.amazonaws.com
+routerA ansible_host=<routerA_host>
+routerB ansible_host=<routerB_host>
+routerC ansible_host=<routerC_host>
 
 [brokers:children]
 masters
 slaves
 
 [masters]
-brokerA ansible_host=ec2-52-43-11-121.us-west-2.compute.amazonaws.com
+brokerA ansible_host=<brokerA_host>
 
 [slaves]
-brokerB ansible_host=ec2-54-71-117-138.us-west-2.compute.amazonaws.com
+brokerB ansible_host=<brokerB_host>

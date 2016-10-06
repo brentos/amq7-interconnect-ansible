@@ -68,8 +68,8 @@ class Send(MessagingHandler):
 
 host = os.getenv("MESSAGING_SERVICE_HOST") or "127.0.0.1"
 port = os.getenv("MESSAGING_SERVICE_PORT") or "5672"
-rate = os.getenv("MESSAGE_RATE")           or "100"
-addr = os.getenv("MESSAGE_ADDR")           or "example"
+rate = os.getenv("MESSAGE_RATE")           or "200"
+addr = os.getenv("MESSAGE_ADDR")           or "jms.queue.testqueue"
 
 if not host:
     raise Exception("No Messaging Service in Environment")
